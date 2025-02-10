@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Interactive WoW Config Copier – Copies Live configuration files to PTR installation.
+    WoW-PTR-Config-Copier – Copies Live configuration files to PTR installation.
 
 .DESCRIPTION
     This PowerShell script creates an interactive terminal wizard that:
@@ -318,9 +318,9 @@ if ($confirm -notmatch '^(Y|y)$') {
 # ============================================================
 Clear-Host
 Write-Host "Choose overwrite option for existing files in the PTR folder:"
-Write-Host "[1] Yes, always overwrite existing files"
-Write-Host "[2] No, never overwrite existing files (only copy new files)"
-Write-Host "[3] Ask individually for each file/operation"
+Write-Host "[1] Yes, always mirror existing files (make PTR identical to LIVE, all live files copied, ptr files either overwritten or, if not present in live, deleted)"
+Write-Host "[2] No, never overwrite existing files (only copy new files, leave existing PTR ones alone. Useful for testing new addons but already have settings you don't want to lose on PTR)"
+Write-Host "[3] Ask individually for each config step (when you have specific needs for each folder/config)"
 $overwriteInput = Read-Host "Enter your selection (1, 2, or 3)"
 switch ($overwriteInput) {
     "1" { $globalOverwriteOption = "Yes" }
@@ -341,13 +341,13 @@ function Get-RobocopySwitches {
     if ($globalOverwriteOption -eq "Yes") {
          return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
     } elseif ($globalOverwriteOption -eq "No") {
-         return @("/MIR", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+         return @("/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
     } elseif ($globalOverwriteOption -eq "Ask") {
          $ans = Read-Host "For operation '$OperationName', do you want to overwrite existing files? (Y/N)"
          if ($ans -match '^(Y|y)$') {
              return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
          } else {
-             return @("/MIR", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+             return @("/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
          }
     }
 }
@@ -464,6 +464,7 @@ if (Test-Path $sourceBindingsAcc) {
     Copy-FileWithOption -Source $sourceBindingsAcc -Destination $destBindingsAcc
 } else {
     Write-Host "[Warning] Live account bindings-cache.wtf not found."
+    Write-Host "[Warning] Likely due to no account-wide keybindings set (? - honestly double check your folder) and the character using the Character-specific keybindings."
 }
 Write-Host ""
 Write-Host "Account-wide Keybindings copied successfully."
@@ -477,6 +478,7 @@ if (Test-Path $sourceBindingsChar) {
     Copy-FileWithOption -Source $sourceBindingsChar -Destination $destBindingsChar
 } else {
     Write-Host "[Warning] Live character bindings-cache.wtf not found."
+    Write-Host "[Warning] Likely due to no character-specific keybindings set and the character using the account-wide keybindings."
 }
 Write-Host ""
 Write-Host "Character-specific Keybindings copied successfully."
@@ -493,6 +495,7 @@ if (Test-Path $sourceMacrosAccWTF) {
     Copy-FileWithOption -Source $sourceMacrosAccTXT -Destination (Join-Path (Join-Path $ptrAccountPath $ptrAccount) "macros-cache.txt")
 } else {
     Write-Host "[Warning] Live account macros-cache file not found."
+    Write-Host "[Warning] Likely due to no Account-wide macros set and the character using the character-specific macros."
 }
 Write-Host ""
 Write-Host "Account-wide Macros copied successfully."
@@ -508,6 +511,7 @@ if (Test-Path $sourceMacrosCharWTF) {
     Copy-FileWithOption -Source $sourceMacrosCharTXT -Destination (Join-Path (Join-Path $ptrAccountPath $ptrAccount) "$ptrRealm\$ptrCharacter\macros-cache.txt")
 } else {
     Write-Host "[Warning] Live character macros-cache file not found."
+    Write-Host "[Warning] Likely due to no character-specific macros set and the character using the account-wide macros."
 }
 Write-Host ""
 Write-Host "Character-specific Macros copied successfully."
