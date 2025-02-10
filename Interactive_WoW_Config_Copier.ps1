@@ -14,10 +14,10 @@
         select their Account, Realm, and Character folders (returning only the folder names).
       - Provides an option to go “back” (to the previous selection) or exit when an invalid
         input is encountered or no subdirectories exist.
-      - **NEW:** Before copying, the script prompts whether to overwrite existing files in the PTR folder:
+      - Prompts the user whether to overwrite existing files in the PTR folder:
             • Yes – always overwrite  
             • No – never overwrite (only copy new files)  
-            • Ask – prompt for each file  
+            • Ask – prompt for each robocopy operation individually  
       - Copies configuration files (using robocopy for directories and Copy-Item for files)
         from the LIVE installation to the PTR installation.
         
@@ -30,7 +30,7 @@
 # ============================================================
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator)) {
     Write-Host "This script is not running as Administrator."
-    Write-Host "Some/All operations may fail due to insufficient permissions if WoW is installed in a protected directory. e.g Program Files"
+    Write-Host "Some/All operations may fail due to insufficient permissions if WoW is installed in a protected directory."
     $response = Read-Host "Would you like to restart it with administrative privileges? (Y/N)"
     if ($response -match '^(Y|y)$') {
         $scriptPath = $PSCommandPath
@@ -191,7 +191,7 @@ Write-Host "----------------------------------------"
 Write-Host "Select your LIVE installation folder from:"
 Write-Host "$mainWowFolder"
 Write-Host "----------------------------------------"
-$liveDir = Select-Folder -Path $mainWowFolder -Prompt "Select LIVE installation folder :" -FilterRegex "^_" -IncludeManual
+$liveDir = Select-Folder -Path $mainWowFolder -Prompt "Select LIVE installation folder:" -FilterRegex "^_" -IncludeManual
 Write-Host "LIVE installation folder set to: $liveDir"
 Pause
 
@@ -320,7 +320,7 @@ Clear-Host
 Write-Host "Choose overwrite option for existing files in the PTR folder:"
 Write-Host "[1] Yes, always overwrite existing files"
 Write-Host "[2] No, never overwrite existing files (only copy new files)"
-Write-Host "[3] Ask individually for each file"
+Write-Host "[3] Ask individually for each file/operation"
 $overwriteInput = Read-Host "Enter your selection (1, 2, or 3)"
 switch ($overwriteInput) {
     "1" { $globalOverwriteOption = "Yes" }
@@ -328,14 +328,28 @@ switch ($overwriteInput) {
     "3" { $globalOverwriteOption = "Ask" }
     default { $globalOverwriteOption = "Yes" }
 }
+Write-Host "Global overwrite option set to: $globalOverwriteOption"
+Pause
 
 # ============================================================
-# Set robocopy switches based on overwrite option
+# Function: Get-RobocopySwitches
 # ============================================================
-if ($globalOverwriteOption -eq "Yes" -or $globalOverwriteOption -eq "Ask") {
-    $robocopySwitches = "/MIR /NDL /NFL /NP /IS"
-} elseif ($globalOverwriteOption -eq "No") {
-    $robocopySwitches = "/MIR /NDL /NFL /NP /XO /XN /XC"
+function Get-RobocopySwitches {
+    param (
+         [string]$OperationName
+    )
+    if ($globalOverwriteOption -eq "Yes") {
+         return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
+    } elseif ($globalOverwriteOption -eq "No") {
+         return @("/MIR", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+    } elseif ($globalOverwriteOption -eq "Ask") {
+         $ans = Read-Host "For operation '$OperationName', do you want to overwrite existing files? (Y/N)"
+         if ($ans -match '^(Y|y)$') {
+             return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
+         } else {
+             return @("/MIR", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+         }
+    }
 }
 
 # ============================================================
@@ -377,16 +391,18 @@ Write-Host "---------------------------------------------`n"
 # ============================================================
 # Copy Operations (Directories and Files)
 # ============================================================
-# For directories, we use robocopy with the switches set in $robocopySwitches.
-# For individual files, we use the Copy-FileWithOption function.
+# For directories, we use robocopy with switches from Get-RobocopySwitches.
+# For individual files, we use Copy-FileWithOption.
 
 # -- Copy AddOns --
 Write-Host "Copying AddOns..."
 $sourceAddOns = Join-Path $liveDir "Interface\AddOns"
 $destAddOns   = Join-Path $ptrDir "Interface\AddOns"
-& robocopy $sourceAddOns $destAddOns $robocopySwitches
-Write-Host "Note: 'Skipped' indicates folders were already identical.`n"
+$rcSwitches = Get-RobocopySwitches "AddOns"
+& robocopy $sourceAddOns $destAddOns @rcSwitches
+Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
 Write-Host ""
+Write-Host "Addons copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -394,18 +410,22 @@ Write-Host ""
 Write-Host "Copying Account-wide Addon Settings (SavedVariables)..."
 $sourceSavedVarsAcc = Join-Path $liveAccountPath "$liveAccount\SavedVariables"
 $destSavedVarsAcc   = Join-Path $ptrAccountPath "$ptrAccount\SavedVariables"
-& robocopy $sourceSavedVarsAcc $destSavedVarsAcc $robocopySwitches
-Write-Host "Note: 'Skipped' indicates folders were identical.`n"
+$rcSwitches = Get-RobocopySwitches "Account-wide Addon Settings (SavedVariables)"
+& robocopy $sourceSavedVarsAcc $destSavedVarsAcc @rcSwitches
+Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
 Write-Host ""
+Write-Host "Account-wide Addon Settings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
 Write-Host "Copying Character-specific Addon Settings (SavedVariables)..."
 $sourceSavedVarsChar = Join-Path (Join-Path $liveAccountPath $liveAccount) "$liveRealm\$liveCharacter\SavedVariables"
 $destSavedVarsChar   = Join-Path (Join-Path $ptrAccountPath $ptrAccount) "$ptrRealm\$ptrCharacter\SavedVariables"
-& robocopy $sourceSavedVarsChar $destSavedVarsChar $robocopySwitches
-Write-Host "Note: 'Skipped' indicates folders were identical.`n"
+$rcSwitches = Get-RobocopySwitches "Character-specific Addon Settings (SavedVariables)"
+& robocopy $sourceSavedVarsChar $destSavedVarsChar @rcSwitches
+Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
 Write-Host ""
+Write-Host "Character-specific Addon Settings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -419,6 +439,7 @@ if (Test-Path $sourceConfig) {
     Write-Host "[Warning] Live Config.wtf not found."
 }
 Write-Host ""
+Write-Host "Client-based Game Settings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -431,6 +452,7 @@ if (Test-Path $sourceCache) {
     Write-Host "[Warning] Live config-cache.wtf not found."
 }
 Write-Host ""
+Write-Host "Character-based Game Settings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -444,6 +466,7 @@ if (Test-Path $sourceBindingsAcc) {
     Write-Host "[Warning] Live account bindings-cache.wtf not found."
 }
 Write-Host ""
+Write-Host "Account-wide Keybindings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -456,6 +479,7 @@ if (Test-Path $sourceBindingsChar) {
     Write-Host "[Warning] Live character bindings-cache.wtf not found."
 }
 Write-Host ""
+Write-Host "Character-specific Keybindings copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -471,6 +495,7 @@ if (Test-Path $sourceMacrosAccWTF) {
     Write-Host "[Warning] Live account macros-cache file not found."
 }
 Write-Host ""
+Write-Host "Account-wide Macros copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
@@ -485,6 +510,7 @@ if (Test-Path $sourceMacrosCharWTF) {
     Write-Host "[Warning] Live character macros-cache file not found."
 }
 Write-Host ""
+Write-Host "Character-specific Macros copied successfully."
 Write-Host "============================================"
 Write-Host ""
 
