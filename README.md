@@ -1,13 +1,12 @@
 # WoW-PTR-Config-Copier
 
-**WoW-PTR-Config-Copier** is a PowerShell script designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly.
+**WoW-PTR-Config-Copier** is a PowerShell script designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly. I chose to write it in PowerShell so there is no need for any extra dependencies installation user-side.
 
-PS: This was mainly tested in Classic to Classic PTR, so let me know if it sucks or is not suitable for retail.
+PS: This mainly automates the instructions in this [thread](https://www.reddit.com/r/classicwowtbc/comments/rybv50/comment/hrr728n/), which worked for us, but let me know if this could be improved further. This was designed and tested for classic, but could likely work for retail. 
+Could try to check for it if there is any interest on it.
+PS2: ActionBar spell bindings is most likely server-side, so I recommend the [MySlot](https://www.curseforge.com/wow/addons/myslot) addon if you need it. (If you have any suggestions on tip on how to solve that client-side, I'm all ears.)
 
 ## Features
-
-- **Elevation Check & Relaunch:**  
-  Automatically checks if the script is running with administrator privileges and offers to relaunch itself in elevated mode if needed.
 
 - **Interactive Folder Selection:**  
   - Prompts for the main WoW installation folder using a registry lookup (or a default value) with an option for manual entry.
@@ -17,13 +16,10 @@ PS: This was mainly tested in Classic to Classic PTR, so let me know if it sucks
 - **Custom Overwrite Options:**  
   Before copying, the script prompts whether to always overwrite, never overwrite, or ask for each directory copy (via Robocopy) and file copy (via Copy-Item).
 
-- **Robust Copy Operations:**  
-  Uses Robocopy (with appropriate switches) to mirror directories and Copy-Item (or custom functions) for individual file copies, ensuring your PTR installation is always up-to-date with your Live configuration.
-
 ## Prerequisites
 
-- **Windows PowerShell** (v5 or higher is recommended)
-- The script must be run in an **elevated PowerShell session** (i.e., "Run as Administrator") to access protected directories.
+- **Windows PowerShell** (v5 or higher is recommended) - A normal windows 11 install should have this by default. Win 10 also very likely.
+- The script must be run in an **elevated PowerShell session** (i.e., "Run as Administrator") to access protected directories e.g if WoW is installed in Program Files on your main drive. You can run without it depending where it is.
 
 ## Usage
 
@@ -37,7 +33,7 @@ PS: This was mainly tested in Classic to Classic PTR, so let me know if it sucks
 
 3. **Navigate to the Script Folder:**
    ```powershell
-   cd path\to\Interactive-WoW-Config-Copier
+   cd path\to\WoW-PTR-Config-Copier
    ```
 
 4. **Run the Script:**
@@ -79,4 +75,4 @@ Contributions are welcome! Feel free to fork this repository and submit pull req
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the LICENSE file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.
