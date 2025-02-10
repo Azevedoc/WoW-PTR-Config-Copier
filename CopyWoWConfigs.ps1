@@ -307,6 +307,7 @@ Write-Host "   Account:    $ptrAccount"
 Write-Host "   Realm:      $ptrRealm"
 Write-Host "   Character:  $ptrCharacter"
 Write-Host "==========================================="
+Write-Host ""
 $confirm = Read-Host "`nProceed with copying configuration files? (Y/N)"
 if ($confirm -notmatch '^(Y|y)$') {
     Write-Host "Operation cancelled. Exiting..."
@@ -318,9 +319,15 @@ if ($confirm -notmatch '^(Y|y)$') {
 # ============================================================
 Clear-Host
 Write-Host "Choose overwrite option for existing files in the PTR folder:"
+Write-Host ""
+Write-Host ""
 Write-Host "[1] Yes, always mirror existing files (make PTR identical to LIVE, all live files copied, ptr files either overwritten or, if not present in live, deleted)"
+Write-Host ""
 Write-Host "[2] No, never overwrite existing files (only copy new files, leave existing PTR ones alone. Useful for testing new addons but already have settings you don't want to lose on PTR)"
+Write-Host ""
 Write-Host "[3] Ask individually for each config step (when you have specific needs for each folder/config)"
+Write-Host ""
+Write-Host ""
 $overwriteInput = Read-Host "Enter your selection (1, 2, or 3)"
 switch ($overwriteInput) {
     "1" { $globalOverwriteOption = "Yes" }
@@ -328,6 +335,7 @@ switch ($overwriteInput) {
     "3" { $globalOverwriteOption = "Ask" }
     default { $globalOverwriteOption = "Yes" }
 }
+Write-Host ""
 Write-Host "Global overwrite option set to: $globalOverwriteOption"
 Pause
 
@@ -341,13 +349,13 @@ function Get-RobocopySwitches {
     if ($globalOverwriteOption -eq "Yes") {
          return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
     } elseif ($globalOverwriteOption -eq "No") {
-         return @("/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+         return @("/S", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
     } elseif ($globalOverwriteOption -eq "Ask") {
          $ans = Read-Host "For operation '$OperationName', do you want to overwrite existing files? (Y/N)"
          if ($ans -match '^(Y|y)$') {
              return @("/MIR", "/NDL", "/NFL", "/NP", "/IS")
          } else {
-             return @("/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
+             return @("/S", "/NDL", "/NFL", "/NP", "/XO", "/XN", "/XC")
          }
     }
 }
@@ -400,7 +408,7 @@ $sourceAddOns = Join-Path $liveDir "Interface\AddOns"
 $destAddOns   = Join-Path $ptrDir "Interface\AddOns"
 $rcSwitches = Get-RobocopySwitches "AddOns"
 & robocopy $sourceAddOns $destAddOns @rcSwitches
-Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
+Write-Host "Note: 'Skipped' indicates folders/files were already present in some form in PTR.`n"
 Write-Host ""
 Write-Host "Addons copied successfully."
 Write-Host "============================================"
@@ -412,7 +420,7 @@ $sourceSavedVarsAcc = Join-Path $liveAccountPath "$liveAccount\SavedVariables"
 $destSavedVarsAcc   = Join-Path $ptrAccountPath "$ptrAccount\SavedVariables"
 $rcSwitches = Get-RobocopySwitches "Account-wide Addon Settings (SavedVariables)"
 & robocopy $sourceSavedVarsAcc $destSavedVarsAcc @rcSwitches
-Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
+Write-Host "Note: 'Skipped' indicates folders/files were already present in some form in PTR.`n"
 Write-Host ""
 Write-Host "Account-wide Addon Settings copied successfully."
 Write-Host "============================================"
@@ -423,7 +431,7 @@ $sourceSavedVarsChar = Join-Path (Join-Path $liveAccountPath $liveAccount) "$liv
 $destSavedVarsChar   = Join-Path (Join-Path $ptrAccountPath $ptrAccount) "$ptrRealm\$ptrCharacter\SavedVariables"
 $rcSwitches = Get-RobocopySwitches "Character-specific Addon Settings (SavedVariables)"
 & robocopy $sourceSavedVarsChar $destSavedVarsChar @rcSwitches
-Write-Host "Note: 'Skipped' indicates folders/files were already identical.`n"
+Write-Host "Note: 'Skipped' indicates folders/files were already present in some form in PTR.`n"
 Write-Host ""
 Write-Host "Character-specific Addon Settings copied successfully."
 Write-Host "============================================"
