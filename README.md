@@ -23,6 +23,10 @@ PS2: ActionBar spell bindings is most likely server-side, so I recommend the [My
 
 ## Usage
 
+0. **Log in with your PTR character**
+   Before doing anything, log in the PTR, copy your character(s) if not done so, enter the world, then exit the game. (Game must be closed or it will try to overwrite things)
+   This will create the necessary local folder structure needed for the script to work.
+
 1. **Clone or Download** the repository:
    ```bash
    git clone https://github.com/Azevedoc/WoW-PTR-Config-Copier.git

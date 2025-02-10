@@ -109,6 +109,7 @@ function Select-Folder {
     Write-Host "[X] Exit"
     if ($IncludeManual) {
        Write-Host "[M] Manual Entry (type a custom folder path)"
+       Write-Host ""
     }
     do {
        $extraOption = if ($IncludeManual) { ", M" } else { "" }
