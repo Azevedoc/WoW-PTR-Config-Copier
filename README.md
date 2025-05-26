@@ -1,10 +1,12 @@
-# WoW-PTR-Config-Copier
+# WoW-Config-Copier
 
-**WoW-PTR-Config-Copier** is a PowerShell script designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly. I chose to write it in PowerShell so there is no need for any extra dependencies installation user-side.
+**WoW-Config-Copier** is a modular PowerShell application designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly.
 
-PS: This mainly automates the instructions in this [thread](https://www.reddit.com/r/classicwowtbc/comments/rybv50/comment/hrr728n/), which worked for us, but let me know if this could be improved further. This was designed and tested for classic, but could likely work for retail. Could try to check for it if there is any interest on it.
+This application is written in PowerShell so there is no need for any extra dependencies installation user-side.
 
-PS2: ActionBar spell bindings is most likely server-side, so I recommend the [MySlot](https://www.curseforge.com/wow/addons/myslot) addon if you need it. (If you have any suggestions on tip on how to solve that client-side, I'm all ears.)
+PS: This application automates the instructions in this [thread](https://www.reddit.com/r/classicwowtbc/comments/rybv50/comment/hrr728n/), which worked for us, but let me know if this could be improved further. This was designed and tested for Classic WoW, but should work for Retail as well.
+
+PS2: ActionBar spell bindings are most likely server-side, so I recommend the [MySlot](https://www.curseforge.com/wow/addons/myslot) addon if you need it. (If you have any suggestions on how to solve that client-side, I'm all ears.)
 
 ## Features
 
@@ -16,16 +18,21 @@ PS2: ActionBar spell bindings is most likely server-side, so I recommend the [My
 - **Custom Overwrite Options:**  
   Before copying, the script prompts whether to always overwrite, never overwrite, or ask for each directory copy (via Robocopy) and file copy (via Copy-Item).
 
+- **Configuration Management:**
+  - Save your current configuration to a JSON file for future use
+  - Import previously saved configurations
+
 ## Prerequisites
 
-- **Windows PowerShell** (v5 or higher is recommended) - A normal windows 11 install should have this by default. Win 10 also very likely.
-- The script must be run in an **elevated PowerShell session** (i.e., "Run as Administrator") to access protected directories e.g if WoW is installed in Program Files on your main drive. You can run without it depending where it is.
+- **Windows PowerShell** (v5.1 or higher) - A normal Windows 10/11 install should have this by default.
+- The script must be run in an **elevated PowerShell session** (i.e., "Run as Administrator") if WoW is installed in protected directories like Program Files.
 
 ## Usage
 
 0. **Log in with your PTR character:**
-   - Before doing anything, log in the PTR, copy your character(s) if not done so, enter the world, then exit the game. (Game must be closed or it will try to overwrite things)
+   - Before doing anything, log in to the PTR, copy your character(s) if not done already, enter the world, then exit the game.
    - This will create the necessary local folder structure needed for the script to work.
+   - Note: Game must be closed during the copy process or it may conflict with files being modified.
 
 1. **Clone or Download** the repository:
    ```bash
@@ -42,36 +49,40 @@ PS2: ActionBar spell bindings is most likely server-side, so I recommend the [My
 
 4. **Run the Script:**
    ```powershell
-   .\CopyWoWConfigs.ps1
+   .\WoW-Config-Copier.ps1
    ```
 
 5. **Follow the Interactive Prompts:**
-   - Select the main WoW folder, then choose your Live and PTR installation subfolders.
-   - Select your Account, Realm, and Character folders.
-   - Finally, choose your overwrite option:
+   - Choose whether to use the interactive wizard or import a previously saved configuration
+   - If using the wizard:
+     - Select the main WoW folder, then choose your Live and PTR installation subfolders.
+     - Select your Account, Realm, and Character folders.
+   - Choose your overwrite option:
      - Yes – Always overwrite existing files.
      - No – Never overwrite (only copy new files).
      - Ask – Prompt for each directory copy whether to overwrite existing files.
 
-## How It Works
+## Project Structure
 
-The script is organized into several key sections:
+- **WoW-Config-Copier.ps1** - Main script file and entry point
+- **saved_exports/** - Directory for saved configuration files
+
+## How It Works
 
 - **Elevation Check:**
   Ensures the script runs with administrator privileges by checking the current Windows identity. If not elevated, it prompts to restart the script in elevated mode.
 
-- **Folder Selection Functions:**
-  - `Select-Folder` provides a consistent, interactive interface to list and select subdirectories. It supports filtering (to show only folders beginning with `_`), manual entry, and options to go back or exit.
-  - `Get-WoWMainFolder` attempts to detect the main WoW installation folder via the registry.
+- **Folder Selection:**
+  Provides a consistent, interactive interface to list and select subdirectories with support for filtering, manual entry, and navigation options.
 
 - **Interactive Prompts:**
-  Guides the user step-by-step through selecting the installation folders, account folders, realms, and characters.
+  Guides the user step-by-step through selecting installation folders, account folders, realms, and characters.
 
 - **Overwrite Handling:**
-  Allows you to specify whether to always overwrite existing files, never overwrite, or prompt for each directory copy individually. For Robocopy operations, the script builds the appropriate set of switches based on your choice.
+  Allows you to specify whether to always overwrite existing files, never overwrite, or prompt for each directory copy individually.
 
 - **Copy Operations:**
-  Uses Robocopy for robust directory copying (with dynamically built switch arrays) and Copy-Item for individual file copying, ensuring that your PTR folder mirrors your Live configuration as desired.
+  Uses Robocopy for robust directory copying and Copy-Item for individual file copying, ensuring that your PTR folder mirrors your Live configuration as desired.
 
 ## Contributing
 
