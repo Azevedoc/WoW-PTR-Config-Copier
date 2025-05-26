@@ -49,7 +49,7 @@ PS2: ActionBar spell bindings are most likely server-side, so I recommend the [M
 
 4. **Run the Script:**
    ```powershell
-   .\WoW-Config-Copier.ps1
+   .\CopyWoWConfigs.ps1
    ```
 
 5. **Follow the Interactive Prompts:**
@@ -58,13 +58,13 @@ PS2: ActionBar spell bindings are most likely server-side, so I recommend the [M
      - Select the main WoW folder, then choose your Live and PTR installation subfolders.
      - Select your Account, Realm, and Character folders.
    - Choose your overwrite option:
-     - Yes – Always overwrite existing files.
-     - No – Never overwrite (only copy new files).
-     - Ask – Prompt for each directory copy whether to overwrite existing files.
+     - Yes – Always mirror Live to PTR. **Warning:** This will delete files in the PTR target folder if they don't exist in the Live source folder, making the PTR configuration an exact replica of Live for the selected components.
+     - No – Never overwrite (only copy new files, leaving existing PTR files untouched).
+     - Ask – Prompt for each major configuration step (e.g., Addons, Account Settings) whether to mirror or only copy new files for that step.
 
 ## Project Structure
 
-- **WoW-Config-Copier.ps1** - Main script file and entry point
+- **CopyWoWConfigs.ps1** - Main script file and entry point
 - **saved_exports/** - Directory for saved configuration files
 
 ## How It Works
@@ -79,7 +79,10 @@ PS2: ActionBar spell bindings are most likely server-side, so I recommend the [M
   Guides the user step-by-step through selecting installation folders, account folders, realms, and characters.
 
 - **Overwrite Handling:**
-  Allows you to specify whether to always overwrite existing files, never overwrite, or prompt for each directory copy individually.
+  Allows you to specify your preferred copy behavior:
+  - **Yes (Mirror):** Makes the selected PTR configuration components an exact replica of the Live components. Files in the PTR destination that are not present in the Live source will be deleted.
+  - **No (Copy New):** Copies only files from Live that do not already exist in PTR, leaving existing PTR files untouched.
+  - **Ask (Per Operation):** For each major configuration step (like AddOns, SavedVariables, specific game settings files), you'll be prompted to choose whether to mirror or only copy new files for that particular step.
 
 - **Copy Operations:**
   Uses Robocopy for robust directory copying and Copy-Item for individual file copying, ensuring that your PTR folder mirrors your Live configuration as desired.
