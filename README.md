@@ -1,6 +1,6 @@
 # WoW-Config-Copier
 
-**WoW-Config-Copier** is a modular PowerShell application designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly.
+**WoW-Config-Copier** is a small PowerShell application designed to help World of Warcraft players easily copy configuration files from their **Live** installation to a **PTR** (Public Test Realm) installation. This interactive terminal wizard makes it simple for users—without manual editing—to select installation folders, account details, and overwrite options, then copies add-ons, settings, keybindings, macros, and game settings accordingly.
 
 This application is written in PowerShell so there is no need for any extra dependencies installation user-side.
 
